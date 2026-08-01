@@ -1,0 +1,36 @@
+{
+  "module": "",
+  "allowSameLayer": true,
+  "includeTests": false,
+  "ignoreDirs": ["vendor", ".git"],
+  "layers": [
+    {
+      "name": "domain",
+      "patterns": ["internal/domain/**"],
+      "dependsOn": []
+    },
+    {
+      "name": "usecase",
+      "patterns": ["internal/usecase/**"],
+      "dependsOn": ["domain"]
+    },
+    {
+      "name": "interface",
+      "patterns": ["internal/interface/**", "internal/adapter/**"],
+      "dependsOn": ["usecase", "domain"]
+    },
+    {
+      "name": "infrastructure",
+      "patterns": ["internal/infrastructure/**", "cmd/**"],
+      "dependsOn": ["interface", "usecase", "domain"]
+    }
+  ],
+  "ignores": [
+    {
+      "fromLayer": "usecase",
+      "toLayer": "infrastructure",
+      "file": "internal/usecase/legacy/**",
+      "reason": "legacy migration"
+    }
+  ]
+}
