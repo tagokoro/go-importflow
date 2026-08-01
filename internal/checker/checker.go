@@ -13,7 +13,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/tagokoro/go-dep-boundary/internal/config"
+	"github.com/tagokoro/go-importflow/internal/config"
 )
 
 type Result struct {

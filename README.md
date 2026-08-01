@@ -1,6 +1,6 @@
-# go-dep-boundary
+# go-importflow
 
-A CI-friendly CLI that statically checks Go imports and reports dependency boundary violations, such as Clean Architecture layer direction breaks.
+A CI-friendly CLI that statically checks Go import flow and reports dependency direction violations, such as Clean Architecture layer direction breaks.
 
 ## Features
 
@@ -12,20 +12,28 @@ A CI-friendly CLI that statically checks Go imports and reports dependency bound
 
 ## Usage
 
+Install:
+
 ```sh
-go run ./cmd/depbound -config depbound.json
+go install github.com/tagokoro/go-importflow/cmd/go-importflow@latest
+```
+
+Run from source:
+
+```sh
+go run ./cmd/go-importflow -config go-importflow.json
 ```
 
 When there are no violations:
 
 ```text
-depbound: ok (4 packages checked)
+go-importflow: ok (4 packages checked)
 ```
 
 When violations are found:
 
 ```text
-depbound: found 1 dependency boundary violation(s)
+go-importflow: found 1 dependency boundary violation(s)
 - example.com/app/internal/usecase [usecase] imports example.com/app/internal/infrastructure/postgres [infrastructure] at /repo/internal/usecase/user.go:3
   rule: layer "usecase" allowed dependencies: domain
 ```
@@ -33,7 +41,7 @@ depbound: found 1 dependency boundary violation(s)
 JSON output:
 
 ```sh
-go run ./cmd/depbound -config depbound.json -format json
+go run ./cmd/go-importflow -config go-importflow.json -format json
 ```
 
 ## Configuration
@@ -41,7 +49,7 @@ go run ./cmd/depbound -config depbound.json -format json
 Generate a sample config:
 
 ```sh
-go run ./cmd/depbound -init -config depbound.json
+go run ./cmd/go-importflow -init -config go-importflow.json
 ```
 
 Example:
@@ -77,7 +85,7 @@ Example:
 }
 ```
 
-If `module` is empty, depbound reads the module path from the target project's `go.mod`.
+If `module` is empty, go-importflow reads the module path from the target project's `go.mod`.
 
 `patterns` are matched against package directories. `**` matches multiple path segments. For example, `internal/domain/**` matches both `internal/domain` and `internal/domain/model`.
 
@@ -115,7 +123,7 @@ When multiple selectors are set, all of them must match for the violation to be 
 ## CI Example
 
 ```yaml
-name: dependency-boundary
+name: go-importflow
 
 on:
   pull_request:
@@ -123,14 +131,14 @@ on:
     branches: [main]
 
 jobs:
-  depbound:
+  go-importflow:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - run: go run ./cmd/depbound -config depbound.json
+      - run: go run ./cmd/go-importflow -config go-importflow.json
 ```
 
 ## Exit Codes

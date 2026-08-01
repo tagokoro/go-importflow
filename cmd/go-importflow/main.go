@@ -8,8 +8,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/tagokoro/go-dep-boundary/internal/checker"
-	"github.com/tagokoro/go-dep-boundary/internal/config"
+	"github.com/tagokoro/go-importflow/internal/checker"
+	"github.com/tagokoro/go-importflow/internal/config"
 )
 
 const (
@@ -23,7 +23,7 @@ func main() {
 }
 
 func run(args []string, stdout io.Writer, stderr io.Writer) int {
-	fs := flag.NewFlagSet("depbound", flag.ContinueOnError)
+	fs := flag.NewFlagSet("go-importflow", flag.ContinueOnError)
 	fs.SetOutput(stderr)
 
 	var (
@@ -33,7 +33,7 @@ func run(args []string, stdout io.Writer, stderr io.Writer) int {
 		initConfig bool
 	)
 
-	fs.StringVar(&configPath, "config", "depbound.json", "path to dependency boundary config")
+	fs.StringVar(&configPath, "config", "go-importflow.json", "path to import flow config")
 	fs.StringVar(&root, "root", ".", "Go module root")
 	fs.StringVar(&format, "format", "text", "output format: text or json")
 	fs.BoolVar(&initConfig, "init", false, "write a sample config to -config")
@@ -44,7 +44,7 @@ func run(args []string, stdout io.Writer, stderr io.Writer) int {
 
 	if initConfig {
 		if err := config.WriteExample(configPath); err != nil {
-			fmt.Fprintf(stderr, "depbound: write config: %v\n", err)
+			fmt.Fprintf(stderr, "go-importflow: write config: %v\n", err)
 			return exitError
 		}
 		fmt.Fprintf(stdout, "wrote %s\n", configPath)
@@ -53,19 +53,19 @@ func run(args []string, stdout io.Writer, stderr io.Writer) int {
 
 	rootAbs, err := filepath.Abs(root)
 	if err != nil {
-		fmt.Fprintf(stderr, "depbound: resolve root: %v\n", err)
+		fmt.Fprintf(stderr, "go-importflow: resolve root: %v\n", err)
 		return exitError
 	}
 
 	cfg, err := config.Load(configPath)
 	if err != nil {
-		fmt.Fprintf(stderr, "depbound: load config: %v\n", err)
+		fmt.Fprintf(stderr, "go-importflow: load config: %v\n", err)
 		return exitError
 	}
 
 	result, err := checker.Check(rootAbs, cfg)
 	if err != nil {
-		fmt.Fprintf(stderr, "depbound: check: %v\n", err)
+		fmt.Fprintf(stderr, "go-importflow: check: %v\n", err)
 		return exitError
 	}
 
@@ -74,11 +74,11 @@ func run(args []string, stdout io.Writer, stderr io.Writer) int {
 		printText(stdout, result)
 	case "json":
 		if err := json.NewEncoder(stdout).Encode(result); err != nil {
-			fmt.Fprintf(stderr, "depbound: encode json: %v\n", err)
+			fmt.Fprintf(stderr, "go-importflow: encode json: %v\n", err)
 			return exitError
 		}
 	default:
-		fmt.Fprintf(stderr, "depbound: unknown -format %q\n", format)
+		fmt.Fprintf(stderr, "go-importflow: unknown -format %q\n", format)
 		return exitError
 	}
 
@@ -91,14 +91,14 @@ func run(args []string, stdout io.Writer, stderr io.Writer) int {
 func printText(w io.Writer, result checker.Result) {
 	if len(result.Violations) == 0 {
 		if len(result.IgnoredViolations) > 0 {
-			fmt.Fprintf(w, "depbound: ok (%d packages checked, %d ignored)\n", result.CheckedPackages, len(result.IgnoredViolations))
+			fmt.Fprintf(w, "go-importflow: ok (%d packages checked, %d ignored)\n", result.CheckedPackages, len(result.IgnoredViolations))
 			return
 		}
-		fmt.Fprintf(w, "depbound: ok (%d packages checked)\n", result.CheckedPackages)
+		fmt.Fprintf(w, "go-importflow: ok (%d packages checked)\n", result.CheckedPackages)
 		return
 	}
 
-	fmt.Fprintf(w, "depbound: found %d dependency boundary violation(s)\n", len(result.Violations))
+	fmt.Fprintf(w, "go-importflow: found %d dependency boundary violation(s)\n", len(result.Violations))
 	for _, v := range result.Violations {
 		loc := v.File
 		if v.Line > 0 {
@@ -116,7 +116,7 @@ func printText(w io.Writer, result checker.Result) {
 		fmt.Fprintf(w, "  rule: layer %q allowed dependencies: %s\n", v.FromLayer, joinOrNone(v.AllowedLayers))
 	}
 	if len(result.IgnoredViolations) > 0 {
-		fmt.Fprintf(w, "depbound: ignored %d violation(s)\n", len(result.IgnoredViolations))
+		fmt.Fprintf(w, "go-importflow: ignored %d violation(s)\n", len(result.IgnoredViolations))
 	}
 }
 
