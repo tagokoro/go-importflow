@@ -120,27 +120,6 @@ Supported selectors:
 
 When multiple selectors are set, all of them must match for the violation to be ignored. Empty ignore rules are rejected because they are too broad.
 
-## CI Example
-
-```yaml
-name: go-importflow
-
-on:
-  pull_request:
-  push:
-    branches: [main]
-
-jobs:
-  go-importflow:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-      - run: go run ./cmd/go-importflow -config go-importflow.json
-```
-
 ## Exit Codes
 
 - `0`: no violations
